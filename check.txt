@@ -1,0 +1,126 @@
+Step 1: Identify Entities and Attributes
+From the ER diagram (https://i.imgur.com/oHkrfiJ.png), we can identify the following entities and their attributes:
+
+Hotel
+
+Attributes: Hotel_ID (PK), Name, Location, Classification
+Primary Key (PK): Hotel_ID
+Room
+
+Attributes: Room_ID (PK), Type, Price, Hotel_ID (FK)
+Foreign Key (FK): Hotel_ID references Hotel(Hotel_ID)
+Client
+
+Attributes: Client_ID (PK), Name, Phone, Email
+Primary Key (PK): Client_ID
+Reservation
+
+Attributes: Reservation_ID (PK), Date, Start_Date, End_Date, Client_ID (FK), Room_ID (FK)
+Foreign Keys (FK):
+Client_ID references Client(Client_ID)
+Room_ID references Room(Room_ID)
+Payment
+
+Attributes: Payment_ID (PK), Amount, Payment_Date, Reservation_ID (FK)
+Foreign Key (FK): Reservation_ID references Reservation(Reservation_ID)
+Step 2: Identify Relationships
+Based on the ER diagram:
+
+A Hotel can have multiple Rooms, but each Room belongs to only one Hotel. This is a 1-to-many relationship between Hotel and Room.
+A Client can make multiple Reservations, but each Reservation is made by exactly one Client. This is a 1-to-many relationship between Client and Reservation.
+A Room can be reserved in multiple Reservations, and each Reservation involves one Room. This is a 1-to-many relationship between Room and Reservation.
+A Reservation can have one or more Payments, but each Payment corresponds to one Reservation. This is a 1-to-many relationship between Reservation and Payment.
+Step 3: Relational Schema (Tables)
+Using the identified entities, attributes, and relationships, here’s the relational schema:
+
+Hotel Table:
+
+sql
+Copy code
+CREATE TABLE Hotel (
+    Hotel_ID INT PRIMARY KEY,
+    Name VARCHAR(255),
+    Location VARCHAR(255),
+    Classification INT
+);
+Room Table:
+
+sql
+Copy code
+CREATE TABLE Room (
+    Room_ID INT PRIMARY KEY,
+    Type VARCHAR(255),
+    Price DECIMAL(10, 2),
+    Hotel_ID INT,
+    FOREIGN KEY (Hotel_ID) REFERENCES Hotel(Hotel_ID)
+);
+Client Table:
+
+sql
+Copy code
+CREATE TABLE Client (
+    Client_ID INT PRIMARY KEY,
+    Name VARCHAR(255),
+    Phone VARCHAR(15),
+    Email VARCHAR(255)
+);
+Reservation Table:
+
+sql
+Copy code
+CREATE TABLE Reservation (
+    Reservation_ID INT PRIMARY KEY,
+    Date DATE,
+    Start_Date DATE,
+    End_Date DATE,
+    Client_ID INT,
+    Room_ID INT,
+    FOREIGN KEY (Client_ID) REFERENCES Client(Client_ID),
+    FOREIGN KEY (Room_ID) REFERENCES Room(Room_ID)
+);
+Payment Table:
+
+sql
+Copy code
+CREATE TABLE Payment (
+    Payment_ID INT PRIMARY KEY,
+    Amount DECIMAL(10, 2),
+    Payment_Date DATE,
+    Reservation_ID INT,
+    FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
+);
+Step 4: Additional Considerations
+Data Types: The data types (e.g., VARCHAR, INT, DECIMAL) should be chosen according to the expected data (e.g., the type and length of strings, the precision of monetary amounts).
+
+Normalization: The schema adheres to 3NF (Third Normal Form), ensuring that there are no transitive dependencies and that the relationships are cleanly modeled through foreign keys.
+
+Indexes: You might want to create indexes on foreign keys to speed up joins and lookups.
+
+Date Formats: Ensure that the date format in your database aligns with your data's requirements (e.g., YYYY-MM-DD for standard SQL).
+
+Relational Diagram (Overview):
+The relational diagram would look like this (simplified view):
+
+sql
+Copy code
++-----------+       +---------+        +---------+        +------------+       +--------+
+|   Hotel   |       |   Room  |        |  Client |        | Reservation |       | Payment|
++-----------+       +---------+        +---------+        +------------+       +--------+
+| Hotel_ID  | <--+  | Room_ID |  +---> | Client_ID|  +--> | Reservation_ID |   +--> | Payment_ID|
+| Name      |     | Type    |        | Name    |        | Date        |        | Amount |
+| Location  |     | Price   |        | Phone   |        | Start_Date  |        | Payment_Date|
+| Classification|  | Hotel_ID|     | Email   |        | End_Date    |        | Reservation_ID|
++-----------+     +---------+        +---------+        +------------+        +--------+
+                           ^                                              
+                           |                                               
+                   +-------+--------+                                       
+                   |                |                                       
+              +----+   Reservation  |                                       
+              |    +----------------+                                       
+              |                                                                
+        +-----+------+
+        | Room_ID    |
+        | Date       |
+        | Client_ID  |
+        | Room_ID    |
+        +------------+
